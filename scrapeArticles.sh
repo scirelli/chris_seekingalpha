@@ -2,9 +2,11 @@
 
 FILE_SIZE_THRESHOLD=4325
 DELAY_TIME_SECONDS=20
+REQUEST_DELAY_SECONDS=60
 
 urlFileName="/home/pi/Extended/seekingalpha/articles.clean.txt"
 htmlOutput="/home/pi/Extended/seekingalpha/html"
+headerOutput="/home/pi/Extended/seekingalpha/headers"
 machine_cookie=2454333875227
 bknx_fa=1510344728513
 bknx_ss=1510344728513
@@ -15,20 +17,23 @@ cookie=""
 makeRequest(){
     url=$1
     echo $url
-    id=`echo $url | grep -o "article/[0-9]\+" | cut -d/ -f2`
-    echo "id= $id"
+    id=`echo $url | grep -Eo '(article|embargo)/[0-9]+' | cut -d/ -f2`
+    echo "id= ${id}"
 
-    # --cookie "$cookie" \
-    # --verbose \
+    #    --cookie "$cookie" \
+    #    --verbose \
     curl --silent \
+        --location \
+        --verbose \
         --user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36" \
         --header "authority:seekingalpha.com" \
         --header "method:GET" \
-        --header "path:/article/$i" \
+        --header "path:/article/$id" \
         --header "scheme:https" \
-        --dump-header $htmlOutput/${id}_headers.txt \
+        --header "rand:$RANDOM" \
+        --dump-header $headerOutput/${id}_headers.txt \
         --cookie-jar "./cookies_out.txt" \
-        --output $htmlOutput/$id.html \
+        --output $htmlOutput/${id}.html \
         "$url"
 
     fileSize=`stat -c %s $htmlOutput/$id.html`
@@ -47,6 +52,7 @@ while read url; do
         sleep $DELAY_TIME_SECONDS
         makeRequest $url
     done
+    sleep $REQUEST_DELAY_SECONDS
 done
 
 exit 0
