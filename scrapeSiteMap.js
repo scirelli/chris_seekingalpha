@@ -1,4 +1,4 @@
-const URL = require('url'),
+const URL = require('url').URL,
       fs = require('fs'),
       axios = require('axios'),
       DOMParser = require('xmldom').DOMParser;
@@ -37,7 +37,7 @@ axios({
     })
     .catch(error => {
         fs.writeFile(FAILED_REQUESTS, error.config.url + '\n', {flag: 'a'}, err => {
-            console.log(err);
+            if(err) console.log(err);
         });
         console.log(error);
     });
@@ -97,6 +97,7 @@ function gatherArticlesFromSiteMap(siteMapUrl) {
                     archiveQ.push(url);
                 }
             }catch(e) {
+                console.log(e);
             }
         });
 
@@ -105,7 +106,7 @@ function gatherArticlesFromSiteMap(siteMapUrl) {
     })
     .catch(error => {
         fs.writeFile(FAILED_REQUESTS, error.config.url + '\n', {flag: 'a'}, err => {
-            console.log(err);
+            if(err) console.log(err);
         });
         console.log(error);
     });
@@ -116,7 +117,7 @@ function drainArchiveQ(archiveQ) {
 
     if(urls.length > 0){
         fs.writeFile(ARCHILVE_FILE, urls, {flag: 'a'}, err => {
-            console.log(err);
+            if(err) console.log(err);
         });
         archiveQ.splice(0);
     }
