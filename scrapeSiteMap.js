@@ -5,43 +5,71 @@ const URL = require('url').URL,
 
 const ARCHILVE_FILE = './archive.txt',
       FAILED_REQUESTS = './failedRequets.txt',
-      TIME_OUT_MS = 10*1000;
+      TIME_OUT_MS = 10*1000,
+      MIN_SITEMAP_QUERY_TIME_MS = 1000,
+      MAX_SITEMAP_QUERY_TIME_MS = 60 * 1000;
 
 let siteMapQ = [],
     archiveQ = [];
 
-axios({
-    method:'GET',
-    url:'https://seekingalpha.com/robots.txt',
-    responseType:'text',
-    timeout: TIME_OUT_MS,
-    headers: {
-        authority: 'seekingalpha.com',
-        path: 'https://seekingalpha.com/robots.txt',
-        rand: Math.random()*1000
-    }
-})
-    .then(response => {
-        console.log('SiteMap: \n' + response.data);
+fillSitemapQFromFailedFile('./sitemapQ.txt').then(siteMapQ => {
+    drainSiteMapQ(siteMapQ);
+});
 
-        parseRobotsTxtForSitemaps(response.data).map(v => {
-            siteMapQ.push(v);
-        });
+// fillSitemapQFromRobots_txt().then(siteMapQ => {
+//     drainSiteMapQ(siteMapQ);
+// });
 
-        console.log('Maps: ' + siteMapQ);
+function fillSitemapQFromRobots_txt(url){
+    url = url || 'https://seekingalpha.com/robots.txt';
 
-        return siteMapQ;
+    return axios({
+        method:'GET',
+        url:url,
+        responseType:'text',
+        timeout: TIME_OUT_MS,
+        headers: {
+            authority: 'seekingalpha.com',
+            path: 'https://seekingalpha.com/robots.txt',
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
+            rand: Math.random()*1000
+        }
     })
-    .then(siteMapQ => {
-        drainSiteMapQ(siteMapQ);
-    })
-    .catch(error => {
-        fs.writeFile(FAILED_REQUESTS, error.config.url + '\n', {flag: 'a'}, err => {
-            if(err) console.log(err);
-        });
-        console.log(error);
-    });
+        .then(response => {
+            parseRobotsTxtForSitemaps(response.data).map(v => {
+                siteMapQ.push(v);
+            });
 
+            console.log('Sitemaps:\n\t' + siteMapQ.join('\n\t'));
+
+            return siteMapQ;
+        })
+        .catch(error => {
+            fs.writeFile(FAILED_REQUESTS, error.config.url + '\n', {flag: 'a'}, err => {
+                if(err) console.log('Failed to write failed request url\n\t' + err);
+            });
+            console.log('Failed request:\n' + error);
+        });
+}
+
+function fillSitemapQFromFailedFile(path) {
+    path = path || FAILED_REQUESTS;
+    return new Promise((resolve, reject) => { 
+        fs.readFile(path, (err, data) => {
+            if(err) {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            
+            data.toString().split('\n').forEach(line => {
+                siteMapQ.push(line.trim());
+            });
+
+            resolve(siteMapQ);
+        });
+    })
+}
 
 function parseRobotsTxtForSitemaps(str) {
     if(!str || typeof(str) !== 'string') return [];
@@ -60,17 +88,22 @@ function parseRobotsTxtForSitemaps(str) {
 }
 
 function drainSiteMapQ(siteMapQ) {
-    let url;
+    let url,
+        promises = [];
 
     while(url = siteMapQ.shift()){
-        setTimeout((url) => {
-            gatherArticlesFromSiteMap(url);
-        }, 0, url);
+        promises.push(new Promise((resolve, reject) => {
+            setTimeout((url) => {
+                resolve(gatherArticlesFromSiteMap(url));
+            }, Math.randRange(MIN_SITEMAP_QUERY_TIME_MS, MAX_SITEMAP_QUERY_TIME_MS), url);
+        }));
     }
+
+    return Promise.all(promises);
 }
 
 function gatherArticlesFromSiteMap(siteMapUrl) {
-    axios({
+    return axios({
         method:'GET',
         url:siteMapUrl,
         responseType:'document',
@@ -78,6 +111,7 @@ function gatherArticlesFromSiteMap(siteMapUrl) {
         headers: {
             authority: 'seekingalpha.com',
             path: siteMapUrl,
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
             rand: Math.random()*1000
         }
     })
@@ -97,18 +131,18 @@ function gatherArticlesFromSiteMap(siteMapUrl) {
                     archiveQ.push(url);
                 }
             }catch(e) {
-                console.log(e);
+                console.log('Bad URL\n\t' + e);
             }
         });
 
         drainArchiveQ(archiveQ);
-        drainSiteMapQ(siteMapQ);
+        return drainSiteMapQ(siteMapQ);
     })
     .catch(error => {
         fs.writeFile(FAILED_REQUESTS, error.config.url + '\n', {flag: 'a'}, err => {
-            if(err) console.log(err);
+            if(err) console.log('Fialed to write failed request url:\n\t' + err);
         });
-        console.log(error);
+        console.log('Failed request error:\n' + error);
     });
 }
 
@@ -117,8 +151,12 @@ function drainArchiveQ(archiveQ) {
 
     if(urls.length > 0){
         fs.writeFile(ARCHILVE_FILE, urls, {flag: 'a'}, err => {
-            if(err) console.log(err);
+            if(err) console.log('Failed to write archive file\n\t' + err);
         });
         archiveQ.splice(0);
     }
 }
+
+Math.randRange = function(min, max) {
+    return ~~(Math.random() * ((max+1)-min) + min);
+};
