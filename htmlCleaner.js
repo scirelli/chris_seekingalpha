@@ -1,12 +1,14 @@
-#!/usr/bin/node
-//var sanitizeHtml = require('sanitize-html');
+#!/usr/bin/env node
+const sanitizeHtml = require('sanitize-html');
  
-var content = [];
+let content = [];
+
 process.stdin.resume();
 process.stdin.on('data', function(buf) { content.push(buf); });
 process.stdin.on('end', function() {
-    console.log(Buffer.concat(content).toString());
+    let fileContent = Buffer.concat(content).toString(),
+        clean = sanitizeHtml(fileContent);
+        
+    console.log(clean);
 });
 
-//var dirty = 'some really tacky HTML';
-//var clean = sanitizeHtml(dirty);
