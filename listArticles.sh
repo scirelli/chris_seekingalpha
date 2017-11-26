@@ -24,7 +24,8 @@ printf "$htmlDocBegin"
 
 #for f in /home/pi/Shares/rpi_0_playground/pi/seekingalpha/html/*.html; do
 for f in /home/pi/Extended/seekingalpha/html/*.html; do
-    url="/articlesHtml/"`echo "$f" | sed 's/\/home\/pi\/Shares\/rpi_0_playground\/pi\/seekingalpha\/html\///'`
+    #url="/articlesHtml/"`echo "$f" | sed 's/\/home\/pi\/Shares\/rpi_0_playground\/pi\/seekingalpha\/html\///'`
+    url="/articlesHtml/"`echo "$f" | sed 's/\/home\/pi\/Extended\/seekingalpha\/html\///'`
     printf "<li><a target=\"_blank\" href=\"$url\">$url</a></li>"
 done
 
