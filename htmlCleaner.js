@@ -11,4 +11,3 @@ process.stdin.on('end', function() {
         
     console.log(clean);
 });
-

@@ -58,6 +58,8 @@ makeRequest(){
     return 0
 }
 
+echo $$ > scrapeArticles.pid
+
 while read url; do
     makeRequest "$url"
     # while [ $? -gt 0 ]; do
