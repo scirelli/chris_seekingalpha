@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 htmlDocBegin=$(cat <<END
 <!DOCTYPE html>
@@ -18,13 +18,14 @@ END
 )
 anchors=""
 
-printf  "Content-type: text/html\n\n"
+#printf  "Content-type: text/html\n\n"
 
 printf "$htmlDocBegin"
 
-for f in /home/pi/Shares/rpi_0_playground/pi/seekingalpha/html/*.html; do
+#for f in /home/pi/Shares/rpi_0_playground/pi/seekingalpha/html/*.html; do
+for f in /home/pi/Extended/seekingalpha/html/*.html; do
     url="/articlesHtml/"`echo "$f" | sed 's/\/home\/pi\/Shares\/rpi_0_playground\/pi\/seekingalpha\/html\///'`
     printf "<li><a target=\"_blank\" href=\"$url\">$url</a></li>"
 done
 
-printf "$htmlDocEnd""
+printf "$htmlDocEnd"
