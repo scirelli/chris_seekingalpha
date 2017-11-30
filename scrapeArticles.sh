@@ -8,6 +8,7 @@ MIN_REQUEST_DELAY_SECONDS=10
 
 htmlOutput="/home/pi/Extended/seekingalpha/html"
 headerOutput="/home/pi/Extended/seekingalpha/headers"
+logCurrentURL="./currentUrl.txt"
 
 machine_cookie=2454333875227
 bknx_fa=1510344728513
@@ -18,7 +19,7 @@ exitCode=0
 
 makeRequest(){
     url="$1"
-    echo "Processing... $url"
+    echo "Processing... $url" | tee "$logCurrentURL"
 
     #id=`echo "$url" | grep -Eo '(article|embargo)/[0-9]+' | cut -d/ -f2`
     path=`echo "$url" | sed 's/https\?:\/\///' | sed 's/seekingalpha.com//'`
