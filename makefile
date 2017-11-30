@@ -1,7 +1,7 @@
 start=0
 
 all:
-	tail -n+$(start) uniqueArticles.txt | ./scrapeArticles.sh 2> ./failedUrls.txt
+	tail -n+$(start) uniqueArticles.txt | ./scrapeArticles.sh 2>> ./failedUrls.txt
 
 clean:
 	rm /home/pi/Extended/seekingalpha/html/*
@@ -11,3 +11,7 @@ clean:
 counts:
 	echo "htlm files:" `ls /home/pi/Extended/seekingalpha/html | wc -l`
 	echo "header files:" `ls /home/pi/Extended/seekingalpha/headers | wc -l`
+	echo "Cleaned HTML files: " `ls -1 /home/pi/Extended/seekingalpha/cleaned | wc -l`
+
+cleanHtml:
+	./cleanHtml.sh
