@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 start=0
 
 all:
@@ -15,3 +16,6 @@ counts:
 
 cleanHtml:
 	./cleanHtml.sh
+
+getLineNum:
+	echo $(shell grep -no `cat currentUrl.txt` uniqueArticles.txt | cut -f1 -d:)

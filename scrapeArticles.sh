@@ -19,7 +19,9 @@ exitCode=0
 
 makeRequest(){
     url="$1"
-    echo "Processing... $url" | tee "$logCurrentURL"
+
+    echo "Processing... "
+    echo "$url" | tee "$logCurrentURL"
 
     #id=`echo "$url" | grep -Eo '(article|embargo)/[0-9]+' | cut -d/ -f2`
     path=`echo "$url" | sed 's/https\?:\/\///' | sed 's/seekingalpha.com//'`
@@ -73,6 +75,8 @@ while read url; do
     echo "Delaying: $rdelay seconds"
     sleep $rdelay
 done
+
+rm scrapeArticles.pid
 
 exit $exitCode
 
