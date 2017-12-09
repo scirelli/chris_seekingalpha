@@ -30,6 +30,8 @@ makeRequest(){
     echo $fileName
     echo $path
 
+    #str=$(echo "$url" | openssl dgst -md5 -hex);
+    #sttr=${str:$((${#str}-1)):1}
     #set -- "something" "${@:2}" #set param $1 to something
     #    --cookie "$cookie" \
     #    --verbose \

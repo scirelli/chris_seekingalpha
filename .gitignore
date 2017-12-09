@@ -13,3 +13,5 @@ html
 cookies_out.txt
 currentUrl.txt
 scrapeArticles.pid
+cleanedHtml.pid
+dirlist.txt
