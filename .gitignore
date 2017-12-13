@@ -15,3 +15,5 @@ currentUrl.txt
 scrapeArticles.pid
 cleanedHtml.pid
 dirlist.txt
+fileList.txt
+lastCleanedFile.txt

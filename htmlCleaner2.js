@@ -21,6 +21,7 @@ let inputFile = argsv[2],
 
 if(startingPoint) {
     startingPoint = startingPoint.trim();
+    console.log('Starting at: ' + startingPoint);
 }
 
 Promise.all([
@@ -30,7 +31,8 @@ Promise.all([
         }
         
         inputFile = path.normalize(inputFile);
-
+        
+        console.log('Input file: ' + inputFile);
         return true;
     }),
 
@@ -40,7 +42,8 @@ Promise.all([
         }
         
         outputDir = path.normalize(outputDir);
-
+        
+        console.log('Output dir: ' + outputDir);
         return true;
     })
 ]).then(()=>{
@@ -50,6 +53,8 @@ Promise.all([
         }
         
         files = files.toString().split(os.EOL).filter(line => {return line.length !== 0;});
+        
+        console.log('Input file split');
 
         if(startingPoint) {
             let startingIndex = 0;
@@ -60,27 +65,24 @@ Promise.all([
 
             startingIndex = startingIndex === -1? 0 : startingIndex;
             files = files.slice(startingIndex);
+            
+            console.log('Starting at line number \'' + startingIndex + '\'');
         }
 
-        files.forEach((file) => {
-            fs.lstat(file, (err, stats) => {
-                if(err) return console.log(err);
+        for(let i=0,l=files.length,file; i<l; i++){
+            file = files[i];
+            let stats = fs.lstatSync(file);
 
-                if(stats.isFile()) {
-                    fs.readFile(file, (err, data) => {
-                        if(err) throw err;
+            if(stats.isFile()) {
+                let data = fs.readFileSync(file),
+                    clean = sanitizeHtml(data.toString()),
+                    fileName = path.basename(file),
+                    outputFileName = path.join(outputDir, fileName);
 
-                        console.log(file);
-
-                        let clean = sanitizeHtml(data.toString()),
-                            fileName = path.basename(file);
-
-                        fs.writeFile(path.join(outputDir, fileName), clean, (err)=>{
-                            if(err) throw err;
-                        });
-                    });
-                }
-            });
-        });
+                console.log(file);
+                fs.writeFileSync(outputFileName, clean);
+                console.log(outputFileName);
+            }
+        }
     });
 });

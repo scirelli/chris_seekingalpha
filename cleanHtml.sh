@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [ -e cleanedHtml.pid ]; then
+    exit 0
+fi
+
 echo "PID=" $$
 echo $$ > cleanedHtml.pid
 
