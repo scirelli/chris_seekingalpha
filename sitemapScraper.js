@@ -15,7 +15,8 @@ let siteMapQ = [],
 switch(process.argv[2]){
     case '1':
     case 'failed':
-        fillSitemapQFromFailedFile('./sitemapQ.txt').then(siteMapQ => {
+        let failedList = process.argv[3] || './sitemapQ.txt';
+        fillSitemapQFromFailedFile(failedList).then(siteMapQ => {
             drainSiteMapQ(siteMapQ);
         });
         break;
