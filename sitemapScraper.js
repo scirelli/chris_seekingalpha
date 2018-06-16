@@ -12,13 +12,18 @@ const ARCHILVE_FILE = './archive.txt',
 let siteMapQ = [],
     archiveQ = [];
 
-fillSitemapQFromFailedFile('./sitemapQ.txt').then(siteMapQ => {
-    drainSiteMapQ(siteMapQ);
-});
-
-// fillSitemapQFromRobots_txt().then(siteMapQ => {
-//     drainSiteMapQ(siteMapQ);
-// });
+switch(process.argv[2]){
+    case '1':
+    case 'failed':
+        fillSitemapQFromFailedFile('./sitemapQ.txt').then(siteMapQ => {
+            drainSiteMapQ(siteMapQ);
+        });
+        break;
+    default:
+        fillSitemapQFromRobots_txt().then(siteMapQ => {
+            drainSiteMapQ(siteMapQ);
+        });
+}
 
 function fillSitemapQFromRobots_txt(url){
     url = url || 'https://seekingalpha.com/robots.txt';
