@@ -4,6 +4,9 @@ start=0
 all:
 	tail -n+$(start) uniqueArticles.txt | ./scrapeArticles.sh 2>> ./failedUrls.txt
 
+failed:
+	tail -n+$(start) runFailedUrls.txt | ./scrapeArticles.sh 2>> ./failedUrls.txt
+
 clean:
 	rm /home/pi/Extended/seekingalpha/html/*
 	rm /home/pi/Extended/seekingalpha/headers/*

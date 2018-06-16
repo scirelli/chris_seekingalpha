@@ -22,11 +22,10 @@ anchors=""
 
 printf "$htmlDocBegin"
 
-#for f in /home/pi/Shares/rpi_0_playground/pi/seekingalpha/html/*.html; do
-for f in /home/pi/Extended/seekingalpha/html/*.html; do
-    #url="/articlesHtml/"`echo "$f" | sed 's/\/home\/pi\/Shares\/rpi_0_playground\/pi\/seekingalpha\/html\///'`
-    url="/articlesHtml/"`echo "$f" | sed 's/\/home\/pi\/Extended\/seekingalpha\/html\///'`
-    printf "<li><a target=\"_blank\" href=\"$url\">$url</a></li>"
+for f in `find /home/pi/Projects/Chris/chris_seekingalpha/html/ -type f`; do
+    url="/articlesHtml/"`echo "$f" | sed 's/\/home\/pi\/Projects\/Chris\/chris_seekingalpha\/html\///'`
+    text=`echo $url | sed 's/\/articlesHtml\/[a-f]*[0-9]*\///'`
+    printf "<li><a target=\"_blank\" href=\"$url\">$text</a></li>"
 done
 
 printf "$htmlDocEnd"

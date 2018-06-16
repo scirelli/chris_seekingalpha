@@ -9,6 +9,7 @@ MIN_REQUEST_DELAY_SECONDS=10
 htmlOutput="/home/pi/Extended/seekingalpha/html"
 headerOutput="/home/pi/Extended/seekingalpha/headers"
 logCurrentURL="./currentUrl.txt"
+fullArticleTmpDir="/tmp/articles"
 
 machine_cookie=2454333875227
 bknx_fa=1510344728513
@@ -23,19 +24,16 @@ makeRequest(){
     echo "Processing... "
     echo "$url" | tee "$logCurrentURL"
 
-    #id=`echo "$url" | grep -Eo '(article|embargo)/[0-9]+' | cut -d/ -f2`
     path=`echo "$url" | sed 's/https\?:\/\///' | sed 's/seekingalpha.com//'`
     fileName=`echo "$url" | sed 's/https\?:\/\///' | sed 's/\//-/g'`
+    fileName="$fileName.html"
 
-    echo $fileName
-    echo $path
-
-    #str=$(echo "$url" | openssl dgst -md5 -hex);
-    #sttr=${str:$((${#str}-1)):1}
-    #set -- "something" "${@:2}" #set param $1 to something
-    #    --cookie "$cookie" \
-    #    --verbose \
-    #   > /dev/null 2>&1 
+    str=$(echo "$url" | openssl dgst -md5 -hex);
+    d=${str:$((${#str}-1)):1}
+    cleanedDirName="$htmlOutput/$d"
+    tmpDirName="$fullArticleTmpDir/$d"
+    mkdir -p "$cleanedDirName" 1> /dev/null 2>&1
+    mkdir -p "$tmpDirName" 1> /dev/null 2>&1
 
     curl --silent \
         --verbose \
@@ -46,32 +44,31 @@ makeRequest(){
         --header "path:$path" \
         --header "scheme:https" \
         --header "rand:$RANDOM" \
-        --dump-header "$headerOutput/${fileName}_headers.txt" \
         --cookie-jar "./cookies_out.txt" \
-        --output "$htmlOutput/$fileName.html" \
+        --output "$tmpDirName/$fileName" \
         "$url" 1> /dev/null 2>&1
 
-    fileSize=`stat -c %s "$htmlOutput"/"$fileName".html`
-    if [ $fileSize -gt 0 ] && [ $fileSize -le $FILE_SIZE_THRESHOLD ]; then
+    fileSize=`stat -c %s "$tmpDirName"/"$fileName"`
+    if [ $? -ne 0 ] || [ "$fileSize" -ge "0" ] && [ "$fileSize" -le "$FILE_SIZE_THRESHOLD" ]; then
         echo "To small"
         (1>&2 echo $url)
 
         exitCode=1
         return 1
     fi
+    
+    f="$tmpDirName/$fileName"
+    ./htmlCleaner.js < "$f" > "$cleanedDirName/$fileName"
+    rm "$f"
 
     return 0
 }
 
 echo $$ > scrapeArticles.pid
+mkdir -p $fullArticleTmpDir 1> /dev/null 2>&1
 
 while read url; do
     makeRequest "$url"
-    # while [ $? -gt 0 ]; do
-    #     echo "Sleeping for $DELAY_TIME_SECONDS seconds."
-    #     sleep $DELAY_TIME_SECONDS
-    #     makeRequest $url
-    # done
 
     let "rdelay = ($RANDOM % ($MAX_REQUEST_DELAY_SECONDS - $MIN_REQUEST_DELAY_SECONDS)) + 1"
     echo "Delaying: $rdelay seconds"

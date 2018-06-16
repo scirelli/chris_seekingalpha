@@ -11,4 +11,6 @@ echo $$ > listArticles.pid
 
 /home/pi/Projects/Chris/chris_seekingalpha/listArticles.sh > /home/pi/Extended/seekingalpha/listArticles.html
 
+scp -P 2222 /home/pi/Extended/seekingalpha/listArticles.html pi@chris.cirelli.org:/home/pi/Projects/
+
 rm listArticles.pid
