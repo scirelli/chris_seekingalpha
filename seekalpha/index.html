@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Seeking Alpha</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <!-- Chrome, Firefox OS and Opera -->
+        <meta name="theme-color" content="#000000">
+        <!-- Windows Phone -->
+        <meta name="msapplication-navbutton-color" content="#000000">
+        <!-- iOS Safari -->
+        <meta name="apple-mobile-web-app-status-bar-style" content="#000000">
+
+        <link rel="stylesheet" type="text/css" href="css/main.css">
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+        <pre id="article"></pre>
+        <div id="loader"></div>
+
+        <script>
+            (function() {
+                var article = document.getElementById('article'),
+                    loader = document.getElementById('loader'),
+                    prevLength = 0,
+                    REQUEST_DELAY = 2000;;
+
+                function reqDataListener () {
+                    let data = this.responseText;
+
+                    article.innerText = data;
+                    setTimeout(reqHead, REQUEST_DELAY);
+                    loader.classList.toggle('loading');
+                }
+                
+                function reqData() { 
+                    var oReq = new XMLHttpRequest();
+                    oReq.addEventListener("load", reqDataListener);
+                    oReq.open("GET", "articles.txt");
+                    oReq.send();
+                    loader.classList.toggle('loading');
+                }
+
+                function reqHead() {
+                    var oReq = new XMLHttpRequest();
+                    oReq.addEventListener("load", function() {
+                        var length = this.getResponseHeader('content-length');
+
+                        if(prevLength !== length) {
+                            prevLength = length;
+                            reqData();
+                        }else{
+                            setTimeout(reqHead, REQUEST_DELAY);
+                        }
+
+                        loader.classList.toggle('loading');
+                    });
+                    oReq.open("HEAD", "articles.txt");
+                    oReq.send();
+                    loader.classList.toggle('loading');
+                }
+
+                reqHead();
+            })();
+        </script>
+    </body>
+</html>

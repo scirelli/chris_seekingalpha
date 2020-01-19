@@ -1,0 +1,22 @@
+div#loader {
+    display:none;
+}
+
+div#loader.loading {
+    display:block;
+
+    width: 100px;/*200*/
+    height: 75px;/*150*/
+
+    position:fixed;
+    top: 0px;
+    left: 100%;
+
+    margin-left: -100px;
+
+    background-image: url('../img/Llgbv_s-200x150.gif');
+    background-size: 100px 75px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+}
